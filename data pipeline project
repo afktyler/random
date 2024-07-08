@@ -38,5 +38,24 @@ getinfo <- GET(huh)
  
  names(data)
  
- data$minutely_15
+```
+
+
+```{r}
+
+units <- data$minutely_15_units
+units
+```
+
+
+
+```{r}
+df <- data.frame(data$minutely_15)
+df
+```
+
+
+```{r}
+df1  <-  df %>%  separate("time",c('year',"month","day/time","minute"))
+df1 %>% separate(`day/time`, c("day","hour"),"T")
 ```
