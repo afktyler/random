@@ -1,10 +1,13 @@
 ---
 title: "data pipeline project"
 author: "Tyler"
-date: "2022-10-05"
+date: "2022-10-07"
 output:
-  pdf_document: default
-  html_document: default
+  html_document:
+    df_print: paged
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
 ---
 
 
@@ -22,48 +25,30 @@ library(tinytex)
 library(httr)
 library(jsonlite)
 library(stringr)
-library(ggmap)
+library(flexdashboard)
+
 
 ```
 
-```{r}
+```{r someVar, echo=FALSE}
 api_key <- ""
 
 huh <- paste0("https://api.open-meteo.com/v1/forecast?latitude=-25.4295963&longitude=-49.2712724&minutely_15=temperature_2m,relative_humidity_2m,dew_point_2m,rain,snowfall,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility","&appid=", api_key)
+
 getinfo <- GET(huh)
+
+data = fromJSON(rawToChar(getinfo$content))
 ```
 
 
 ```{r}
-
- data = fromJSON(rawToChar(getinfo$content))
- 
- names(data)
- 
-```
-
-```{r}
-lat <- data$latitude
-long <- data$longitude
-
-revgeocode(c(data$longitude,data$latitude))
-```
-
-
-
-
-
-```{r}
-
 units <- data$minutely_15_units
 units
 ```
 
 
-
 ```{r}
 df <- data.frame(data$minutely_15)
-df
 ```
 
 
@@ -78,12 +63,31 @@ df3 <- df2 %>%
    mutate(rain = ifelse(rain > 0 ,"Yes","No")) %>% 
   mutate(snowfall = ifelse(snowfall > 0 ,"Yes","No")) 
 
-df3
-  
+df3$time <- paste(df3$hour,df3$minute, sep = "")
 
-
+df4 <- df3[-c(4,5)] %>% relocate(time, .before = "temperature_2m")
+df4
 ```
 
+
+column {data-width=350}
+----------------------
+### chart A
+
+```{r}
+
+df4 %>% 
+   ggplot() +
+  geom_bar(mapping = aes(x = rain, fill = rain)) +
+  scale_fill_tq() +
+  
+    labs( x = "Rain", 
+          y = "Frequency", 
+          title = "Distribution of Rain in a Two Days") +
+  
+  theme_tq() +
+  theme(legend.position = "none") 
+```
 
 
 
