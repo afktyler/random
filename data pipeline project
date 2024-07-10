@@ -21,13 +21,15 @@ library(tidyquant)
 library(tinytex)
 library(httr)
 library(jsonlite)
+library(stringr)
+library(ggmap)
 
 ```
 
 ```{r}
-api_key <- (censored)
+api_key <- ""
 
-huh <- paste0("https://api.open-meteo.com/v1/forecast?latitude=52.52&longitude=13.41&minutely_15=temperature_2m,relative_humidity_2m,dew_point_2m,rain,snowfall,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility","&appid=", api_key)
+huh <- paste0("https://api.open-meteo.com/v1/forecast?latitude=-25.4295963&longitude=-49.2712724&minutely_15=temperature_2m,relative_humidity_2m,dew_point_2m,rain,snowfall,wind_speed_10m,wind_direction_10m,wind_gusts_10m,visibility","&appid=", api_key)
 getinfo <- GET(huh)
 ```
 
@@ -39,6 +41,16 @@ getinfo <- GET(huh)
  names(data)
  
 ```
+
+```{r}
+lat <- data$latitude
+long <- data$longitude
+
+revgeocode(c(data$longitude,data$latitude))
+```
+
+
+
 
 
 ```{r}
@@ -57,5 +69,33 @@ df
 
 ```{r}
 df1  <-  df %>%  separate("time",c('year',"month","day/time","minute"))
-df1 %>% separate(`day/time`, c("day","hour"),"T")
+df2 <- df1 %>% separate(`day/time`, c("day","hour"),"T")
 ```
+
+
+```{r}
+df3 <- df2 %>% 
+   mutate(rain = ifelse(rain > 0 ,"Yes","No")) %>% 
+  mutate(snowfall = ifelse(snowfall > 0 ,"Yes","No")) 
+
+df3
+  
+
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
